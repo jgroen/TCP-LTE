@@ -59,7 +59,7 @@ static u32 beta_scale __read_mostly;
 static u64 cube_factor __read_mostly;
 
 //Begin TCP-LTE
-static int labmda = 0.1;
+static int lambda = 0.1;
 static int avg_RTT = 0;
 static int diff;
 
@@ -448,10 +448,12 @@ static void bictcp_acked(struct sock *sk, u32 cnt, s32 rtt_us)
 	if (rtt_us < 0)
 		return;
 		
-	avg_RTT= lambda * rtt_us + (1 – lambda) * avg_RTT; 
+	//Begin TCP-LTE
+	avg_RTT= lambda * rtt_us + (1 - lambda) * avg_RTT;
 	// avg_RTT is the EWMA; lambda is a parameter between 0 and 1
-	diff = tp->snd_cwnd * (rtt_us – avg_RTT) / avg_RTT;
+	diff = tp->snd_cwnd * (rtt_us - avg_RTT) / avg_RTT;
 	printk("avg_RTT %d\n diff %d\n", avg_RTT, diff);
+	//End TCP-LTE
 
 	/* Discard delay samples right after fast recovery */
 	if (ca->epoch_start && (s32)(tcp_time_stamp - ca->epoch_start) < HZ)
